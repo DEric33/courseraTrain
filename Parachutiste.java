@@ -40,10 +40,15 @@ class Parachutiste {
 		vitesse = v0;
 		accel = g;
 
-		double s = surfaceCorps / masse; // expression 1
+		double s; // expression 1
 		double q; // expression 2
 
+		boolean vitSon = true, vitMax = true, paraOpen = true;
+		double q2, newVit = 0, newAccel = 0, newAlt = 0;
+
 		do {
+			s = surfaceCorps / masse; // expression 1
+			
 			q = Math.exp(-s * (t - t0)); // temps courant - temps initial
 			vitesse = ((g / s) * (1 - q)) + (v0 * q);
 
@@ -52,9 +57,44 @@ class Parachutiste {
 			hauteur = h0 - ((g / s) * (t - t0)) - (((v0 - (g / s)) / s) * (1 - q));
 			if (hauteur > 0) {
 
+				if (newVit > 343 && vitSon == true) {
+					System.out.println("## Felix depasse la vitesse du son");
+					vitSon = false;
+				}
+
+				if (accel < .5 && vitMax == true) {
+					System.out.println("## Felix a atteint sa vitesse maximale");
+					vitMax = false;
+				}
+
+				/*
+				 * if(newAlt<2500 && paraOpen==true) {
+				 * System.out.println("## Felix ouvre son parachute"); paraOpen = false; }
+				 */
+
 				System.out.printf("%.0f, %.4f, %.4f, %.5f\n", t, hauteur, vitesse, accel);
 
 				t++;
+
+				// prochaine vitesse
+				q2 = Math.exp(-s * (t - t0));
+				newVit = ((g / s) * (1 - q2)) + (v0 * q2);
+
+				// prochaine hauteur
+				newAlt = h0 - ((g / s) * (t - t0)) - (((v0 - (g / s)) / s) * (1 - q2));
+				// System.out.println("####### nouvelle hauteur"+newAlt);
+
+				if (newAlt < 2500 && paraOpen == true) {
+					System.out.println("## Felix ouvre son parachute");
+
+					paraOpen = false;
+					surfaceCorps = 25.0;
+
+					t0 = t;
+					h0 = newAlt;
+					v0 = newVit;
+				}
+
 			}
 
 		} while (hauteur > 0);
